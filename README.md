@@ -40,8 +40,8 @@ Language TypeScript
 
 ### 1. Clone the Repository
 
-    git clone https://github.com/Abdullah-dev0/better-auth-kit.git
-    cd better-auth-kit
+    git https://github.com/Piraveen17/nextjs-betterauth-boilerplate.git
+    cd nextjs-betterauth-boilerplate
 
 ### 2. Install Dependencies
 
