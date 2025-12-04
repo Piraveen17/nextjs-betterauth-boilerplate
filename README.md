@@ -19,15 +19,11 @@ Designed for scalability, security, and real-world usage.
 
 ## 🧰 Tech Stack
 
-Category Technology
-
----
-
-Framework Next.js 16
-Authentication BetterAuth
-Database MongoDB
-Email Nodemailer
-Language TypeScript
+- Framework Next.js 16
+- Authentication BetterAuth
+- Database MongoDB
+- Email Nodemailer
+- Language TypeScript
 
 ## 📦 Prerequisites
 
