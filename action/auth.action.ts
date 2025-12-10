@@ -1,8 +1,8 @@
 "use server";
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
-
 import { type ErrorCode, auth } from "@/lib/auth";
+import getUserByEmail from "@/services/userService";
 
 type ActionState =
   | {
@@ -28,8 +28,42 @@ export async function signUpAction(prevState: ActionState, formData: FormData) {
       success: false,
     };
   }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return {
+      error: "Please enter a valid email address",
+      success: false,
+    };
+  }
+
+  if (password.length < 8) {
+    return {
+      error: "Password must be at least 8 characters long",
+      success: false,
+    };
+  }
+
   try {
-    await auth.api.signUpEmail({
+    const existingUser = await getUserByEmail(email.toLocaleLowerCase());
+
+    if (existingUser) {
+      return {
+        error: "This email is already registered.",
+        success: false,
+        data: { name, email },
+      };
+    }
+  } catch (err) {
+    return {
+      error: "An unexpected error occurred during sign up",
+      success: false,
+      data: { name, email },
+    };
+  }
+
+  try {
+    const result = await auth.api.signUpEmail({
       asResponse: true,
       body: {
         email,
@@ -51,7 +85,7 @@ export async function signUpAction(prevState: ActionState, formData: FormData) {
       switch (errCode) {
         case "USER_ALREADY_EXISTS":
           return {
-            error: "Oops! Something went wrong. Please try again.",
+            error: "This email is already registered.",
             success: false,
             data: { name, email },
           };
