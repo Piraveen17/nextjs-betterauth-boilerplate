@@ -2,7 +2,8 @@
 import { APIError } from "better-auth/api";
 import { headers } from "next/headers";
 import { type ErrorCode, auth } from "@/lib/auth";
-import getUserByEmail from "@/services/userService";
+import getUserByEmail, { createAppUser } from "@/services/userService";
+import { AppUser } from "@/model/AppUser";
 
 type ActionState =
   | {
@@ -46,6 +47,7 @@ export async function signUpAction(prevState: ActionState, formData: FormData) {
 
   try {
     const existingUser = await getUserByEmail(email.toLocaleLowerCase());
+    console.log(existingUser);
 
     if (existingUser) {
       return {
@@ -63,7 +65,7 @@ export async function signUpAction(prevState: ActionState, formData: FormData) {
   }
 
   try {
-    const result = await auth.api.signUpEmail({
+    await auth.api.signUpEmail({
       asResponse: true,
       body: {
         email,
@@ -72,6 +74,12 @@ export async function signUpAction(prevState: ActionState, formData: FormData) {
       },
       headers: await headers(),
     });
+
+    // try {
+    //   const res = await createAppUser({ email, name });
+    // } catch (err: any) {
+    //   console.log(err);
+    // }
 
     return {
       success: true,

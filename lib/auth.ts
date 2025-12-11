@@ -3,16 +3,19 @@ import { mongodbAdapter } from "better-auth/adapters/mongodb";
 import { createAuthMiddleware, APIError } from "better-auth/api";
 import jwt from "jsonwebtoken";
 import { sendEmailAction } from "@/action/sendEmail.action";
-import { connectToDB } from "./mongodb";
 import { nextCookies } from "better-auth/next-js";
+import { connectToDB, getMongoDB } from "./mongodb";
+import { AppUser } from "@/model/AppUser";
+import { createAppUser } from "@/services/userService";
 
-const db = await connectToDB();
+const db = await getMongoDB();
 
 export const auth = betterAuth({
   appName: "Better Auth Kit",
   database: mongodbAdapter(db),
   socialProviders: {
     google: {
+      prompt: "select_account",
       clientId: process.env.GOOGLE_CLIENT_ID as string,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
@@ -106,6 +109,28 @@ export const auth = betterAuth({
         });
       }
     }),
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        after: async (user, ctx) => {
+          console.log("New social user created:", user.email);
+
+          const payload: any = {
+            email: user.email,
+            name: user.name,
+          };
+
+          try {
+            await createAppUser(payload);
+          } catch (err: any) {
+            console.log(err);
+          }
+
+          return Promise.resolve();
+        },
+      },
+    },
   },
   plugins: [nextCookies()],
 });
